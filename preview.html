@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Academy — Formation en ligne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            teal: '#034956',
+            orange: '#f26722',
+            mint: '#e2f1f2',
+            offwhite: '#f6faf7',
+          },
+          fontFamily: { poppins: ['Poppins', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #f6faf7; color: #034956; -webkit-font-smoothing: antialiased; }
+    .page { display: none; }
+    .page.active { display: block; }
+    /* Dashboard layout */
+    .dash-layout { display: flex; min-height: 100vh; }
+    .dash-sidebar { width: 240px; background: #034956; flex-shrink: 0; }
+    .dash-main { flex: 1; background: #f6faf7; overflow-y: auto; }
+    @media(max-width: 768px) {
+      .dash-sidebar { display: none; }
+      .dash-sidebar.open { display: flex; position: fixed; top: 0; left: 0; height: 100%; z-index: 50; flex-direction: column; }
+      .dash-main { width: 100%; }
+    }
+    /* Step indicator */
+    .step-line { flex: 1; height: 2px; background: #e2f1f2; }
+    .step-line.done { background: #f26722; }
+    /* Smooth transitions */
+    .card-hover { transition: transform .2s, box-shadow .2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(3,73,86,.12); }
+    /* Progress bar animation */
+    .prog-bar { transition: width 0.6s ease; }
+    /* Scrollbar hide */
+    .no-scroll::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     SHARED NAVBAR
+     ============================================================ -->
+<nav id="main-nav" class="sticky top-0 z-50 bg-[#034956] shadow-md">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <button onclick="showPage('home')" class="flex items-center gap-3">
+        <svg viewBox="0 0 100 100" fill="none" class="w-9 h-9 flex-shrink-0">
+          <path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#e2f1f2" stroke-width="9" fill="none"/>
+          <path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <line x1="38" y1="55" x2="62" y2="55" stroke="#f26722" stroke-width="8" stroke-linecap="round"/>
+          <line x1="22" y1="57" x2="38" y2="57" stroke="#f26722" stroke-width="6" stroke-linecap="round"/>
+          <path d="M15 85 L9 96 L19 90 Z" fill="#e2f1f2"/>
+        </svg>
+        <span class="text-white font-bold text-xl tracking-tight">Form Academy</span>
+      </button>
+      <div class="hidden md:flex items-center gap-8">
+        <button onclick="showPage('home'); scrollTo(0,0)" class="text-[#e2f1f2] hover:text-white text-sm font-medium transition-colors">Accueil</button>
+        <button onclick="showPage('home'); setTimeout(()=>document.getElementById('courses-section').scrollIntoView({behavior:'smooth'}),50)" class="text-[#e2f1f2] hover:text-white text-sm font-medium transition-colors">Nos Cours</button>
+        <button onclick="showPage('home'); setTimeout(()=>document.getElementById('about-section').scrollIntoView({behavior:'smooth'}),50)" class="text-[#e2f1f2] hover:text-white text-sm font-medium transition-colors">À Propos</button>
+        <button onclick="showPage('enrollment')" class="bg-[#f26722] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors">S'inscrire</button>
+      </div>
+      <button onclick="document.getElementById('mob-menu').classList.toggle('hidden')" class="md:hidden text-white p-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div id="mob-menu" class="hidden md:hidden py-4 border-t border-white/10 flex flex-col gap-3">
+      <button onclick="showPage('home');document.getElementById('mob-menu').classList.add('hidden')" class="text-[#e2f1f2] text-sm font-medium py-2 text-left">Accueil</button>
+      <button onclick="showPage('home');document.getElementById('mob-menu').classList.add('hidden');setTimeout(()=>document.getElementById('courses-section').scrollIntoView({behavior:'smooth'}),50)" class="text-[#e2f1f2] text-sm font-medium py-2 text-left">Nos Cours</button>
+      <button onclick="showPage('home');document.getElementById('mob-menu').classList.add('hidden');setTimeout(()=>document.getElementById('about-section').scrollIntoView({behavior:'smooth'}),50)" class="text-[#e2f1f2] text-sm font-medium py-2 text-left">À Propos</button>
+      <button onclick="showPage('enrollment');document.getElementById('mob-menu').classList.add('hidden')" class="bg-[#f26722] text-white px-5 py-3 rounded-full text-sm font-semibold text-center">S'inscrire</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     PAGE: HOME
+     ============================================================ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="bg-[#f6faf7] overflow-hidden relative">
+    <!-- Orange blob top right -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-[#f26722] rounded-full opacity-[0.07] translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-[#034956] rounded-full opacity-[0.04] -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+      <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12">
+
+        <!-- Left -->
+        <div class="flex-1 text-left">
+          <span class="inline-flex items-center gap-2 bg-[#e2f1f2] text-[#034956] text-xs font-semibold px-4 py-1.5 rounded-full mb-6">
+            <span class="w-2 h-2 bg-[#f26722] rounded-full"></span>
+            Formation en ligne · Algérie · Depuis 2021
+          </span>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#034956] leading-[1.1] mb-6">
+            Apprenez.<br/>
+            <span class="text-[#f26722]">Créez.</span><br/>
+            Évoluez.
+          </h1>
+          <p class="text-[#034956]/65 text-base sm:text-lg leading-relaxed mb-8 max-w-md">
+            Des formations en couture et broderie pensées pour vous permettre de maîtriser votre art, à votre rythme, depuis chez vous.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 mb-10">
+            <button onclick="document.getElementById('courses-section').scrollIntoView({behavior:'smooth'})" class="bg-[#f26722] text-white px-8 py-4 rounded-full font-semibold text-base hover:bg-orange-600 transition-colors shadow-lg shadow-orange-200 text-center">
+              Explorer les cours
+            </button>
+            <button onclick="showPage('enrollment')" class="border-2 border-[#034956] text-[#034956] px-8 py-4 rounded-full font-semibold text-base hover:bg-[#034956] hover:text-white transition-colors text-center">
+              S'inscrire maintenant
+            </button>
+          </div>
+          <!-- Social proof -->
+          <div class="flex items-center gap-4">
+            <div class="flex -space-x-2">
+              <div class="w-9 h-9 rounded-full bg-[#034956] border-2 border-white flex items-center justify-center text-white text-xs font-bold">S</div>
+              <div class="w-9 h-9 rounded-full bg-[#f26722] border-2 border-white flex items-center justify-center text-white text-xs font-bold">A</div>
+              <div class="w-9 h-9 rounded-full bg-[#034956]/70 border-2 border-white flex items-center justify-center text-white text-xs font-bold">M</div>
+              <div class="w-9 h-9 rounded-full bg-[#e2f1f2] border-2 border-white flex items-center justify-center text-[#034956] text-xs font-bold">F</div>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-[#034956]">600+ étudiantes</p>
+              <p class="text-xs text-[#034956]/50">nous font confiance</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right — Dashboard preview card -->
+        <div class="flex-1 w-full max-w-md mx-auto md:mx-0 relative">
+          <!-- Orange circle accent — brand signature -->
+          <div class="absolute -right-8 -top-8 w-64 h-64 bg-[#f26722] rounded-full opacity-10 pointer-events-none"></div>
+          <div class="absolute -right-4 -top-4 w-48 h-48 bg-[#f26722] rounded-full opacity-8 pointer-events-none"></div>
+
+          <!-- Dashboard UI preview -->
+          <div class="relative z-10 bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#034956]/5">
+            <!-- Dashboard top bar -->
+            <div class="bg-[#034956] px-5 py-4 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <svg viewBox="0 0 100 100" fill="none" class="w-6 h-6 flex-shrink-0">
+                  <path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#e2f1f2" stroke-width="10" fill="none"/>
+                  <path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="9" fill="none" stroke-linecap="round"/>
+                  <line x1="38" y1="55" x2="62" y2="55" stroke="#f26722" stroke-width="9" stroke-linecap="round"/>
+                  <line x1="22" y1="57" x2="38" y2="57" stroke="#f26722" stroke-width="7" stroke-linecap="round"/>
+                </svg>
+                <span class="text-white text-sm font-bold">Dashboard</span>
+              </div>
+              <div class="w-7 h-7 bg-[#f26722] rounded-full flex items-center justify-center text-white text-xs font-bold">S</div>
+            </div>
+            <!-- Welcome -->
+            <div class="px-5 py-4 border-b border-[#f6faf7]">
+              <p class="text-[#034956] font-bold text-sm">Bienvenue, Samira 👋</p>
+              <p class="text-[#034956]/50 text-xs">Continuez votre progression</p>
+            </div>
+            <!-- Stat cards -->
+            <div class="grid grid-cols-3 gap-2 px-5 py-4">
+              <div class="bg-[#f6faf7] rounded-xl p-3 text-center">
+                <p class="text-[#f26722] font-extrabold text-lg">2</p>
+                <p class="text-[#034956]/50 text-xs">En cours</p>
+              </div>
+              <div class="bg-[#f6faf7] rounded-xl p-3 text-center">
+                <p class="text-[#034956] font-extrabold text-lg">1</p>
+                <p class="text-[#034956]/50 text-xs">Terminé</p>
+              </div>
+              <div class="bg-[#f6faf7] rounded-xl p-3 text-center">
+                <p class="text-[#f26722] font-extrabold text-lg">1</p>
+                <p class="text-[#034956]/50 text-xs">Certificat</p>
+              </div>
+            </div>
+            <!-- Course card -->
+            <div class="px-5 pb-5">
+              <p class="text-[#034956]/50 text-xs font-semibold uppercase tracking-wider mb-3">Continuer l'apprentissage</p>
+              <div class="bg-[#034956] rounded-2xl p-4 text-white">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <p class="font-bold text-sm leading-snug">Couture Prêt-à-Porter</p>
+                    <p class="text-[#e2f1f2]/60 text-xs mt-0.5">Leçon 4 / 12</p>
+                  </div>
+                  <div class="w-8 h-8 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 bg-white/20 rounded-full h-1.5">
+                    <div class="bg-[#f26722] h-1.5 rounded-full" style="width:75%"></div>
+                  </div>
+                  <span class="text-xs text-[#e2f1f2] font-medium">75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STATS -->
+  <section id="about-section" class="bg-[#034956] py-14">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-[#e2f1f2]/50 text-xs uppercase tracking-widest font-semibold mb-8">Pourquoi nous choisir</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center gap-2 card-hover cursor-default">
+          <svg class="w-7 h-7 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <p class="text-white font-extrabold text-xl">Depuis 2021</p>
+          <p class="text-[#e2f1f2]/50 text-xs">École établie</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center gap-2 card-hover cursor-default">
+          <svg class="w-7 h-7 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <p class="text-white font-extrabold text-xl">600+</p>
+          <p class="text-[#e2f1f2]/50 text-xs">Étudiantes formées</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center gap-2 card-hover cursor-default">
+          <svg class="w-7 h-7 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+          <p class="text-white font-extrabold text-xl">Certificats</p>
+          <p class="text-[#e2f1f2]/50 text-xs">Reconnus</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center gap-2 card-hover cursor-default">
+          <svg class="w-7 h-7 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <p class="text-white font-extrabold text-xl">100% En ligne</p>
+          <p class="text-[#e2f1f2]/50 text-xs">À votre rythme</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COURSES -->
+  <section id="courses-section" class="bg-[#f6faf7] py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-[#f26722] text-xs uppercase tracking-widest font-semibold mb-3">Nos formations</p>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-[#034956] mb-4">Cours populaires</h2>
+        <p class="text-[#034956]/60 max-w-xl mx-auto text-base leading-relaxed">Des formations pratiques et complètes pour créer avec confiance et professionnalisme.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 overflow-hidden card-hover flex flex-col">
+          <div class="bg-[#034956] p-6 min-h-[110px] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-white font-bold text-lg leading-snug">Couture Prêt-à-Porter</h3>
+              <span class="bg-[#f26722] text-white text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0">⭐ Top</span>
+            </div>
+            <p class="text-[#e2f1f2]/60 text-xs mt-2">8 modules · Tous niveaux</p>
+          </div>
+          <div class="p-5 flex flex-col flex-1 gap-4">
+            <p class="text-[#034956]/65 text-sm leading-relaxed flex-1">Maîtrisez la création de vêtements modernes pour adultes. Du patron à la finition professionnelle.</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 bg-[#f26722] rounded-full"></div>
+                <span class="text-xs text-[#034956]/40">Disponible</span>
+              </div>
+              <button onclick="showPage('enrollment')" class="bg-[#f26722] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-orange-600 transition-colors">S'inscrire</button>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 overflow-hidden card-hover flex flex-col">
+          <div class="bg-[#034956] p-6 min-h-[110px] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-white font-bold text-lg leading-snug">Couture Pour Enfant</h3>
+              <span class="bg-[#e2f1f2] text-[#034956] text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0">Nouveau</span>
+            </div>
+            <p class="text-[#e2f1f2]/60 text-xs mt-2">6 modules · Débutant</p>
+          </div>
+          <div class="p-5 flex flex-col flex-1 gap-4">
+            <p class="text-[#034956]/65 text-sm leading-relaxed flex-1">Créez des vêtements adorables pour enfants. Techniques adaptées aux petites tailles.</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 bg-[#f26722] rounded-full"></div>
+                <span class="text-xs text-[#034956]/40">Disponible</span>
+              </div>
+              <button onclick="showPage('enrollment')" class="bg-[#f26722] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-orange-600 transition-colors">S'inscrire</button>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-dashed border-[#034956]/15 overflow-hidden flex flex-col opacity-60">
+          <div class="bg-[#034956]/40 p-6 min-h-[110px] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-white font-bold text-lg leading-snug">Patronage</h3>
+              <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0">Bientôt</span>
+            </div>
+            <p class="text-[#e2f1f2]/50 text-xs mt-2">5 modules · Intermédiaire</p>
+          </div>
+          <div class="p-5 flex flex-col flex-1 gap-4">
+            <p class="text-[#034956]/50 text-sm leading-relaxed flex-1">Apprenez à créer et modifier vos propres patrons. La base indispensable pour toute couturière autonome.</p>
+            <span class="text-xs text-[#034956]/30 font-medium">Prochainement disponible</span>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-dashed border-[#034956]/15 overflow-hidden flex flex-col opacity-60">
+          <div class="bg-[#034956]/40 p-6 min-h-[110px] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-white font-bold text-lg leading-snug">Broderie</h3>
+              <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0">Bientôt</span>
+            </div>
+            <p class="text-[#e2f1f2]/50 text-xs mt-2">7 modules · Tous niveaux</p>
+          </div>
+          <div class="p-5 flex flex-col flex-1 gap-4">
+            <p class="text-[#034956]/50 text-sm leading-relaxed flex-1">Découvrez l'art de la broderie traditionnelle et moderne. Des bases aux motifs avancés.</p>
+            <span class="text-xs text-[#034956]/30 font-medium">Prochainement disponible</span>
+          </div>
+        </div>
+        <!-- Card 5 placeholder -->
+        <div class="bg-white rounded-2xl border-2 border-dashed border-[#034956]/10 flex flex-col items-center justify-center p-8 opacity-40 min-h-[200px]">
+          <svg class="w-10 h-10 text-[#034956]/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+          <p class="text-[#034956]/40 text-sm text-center font-medium">Nouvelle formation<br/>à venir</p>
+        </div>
+      </div>
+      <div class="text-center mt-10">
+        <button onclick="showPage('enrollment')" class="inline-block border-2 border-[#034956] text-[#034956] px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-[#034956] hover:text-white transition-colors">
+          Voir toutes les formations →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD PREVIEW SECTION -->
+  <section class="bg-[#034956] py-16 md:py-24 overflow-hidden relative">
+    <div class="absolute top-0 right-0 w-96 h-96 bg-[#f26722] rounded-full opacity-[0.06] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-left">
+          <p class="text-[#f26722] text-xs uppercase tracking-widest font-semibold mb-4">Votre espace personnel</p>
+          <h2 class="text-white text-3xl sm:text-4xl font-extrabold leading-tight mb-5">
+            Un dashboard conçu<br/>pour votre progression
+          </h2>
+          <p class="text-[#e2f1f2]/65 text-base leading-relaxed mb-8 max-w-md">
+            Suivez vos cours, vos évaluations, et téléchargez vos certificats depuis une interface simple et élégante.
+          </p>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center gap-3 text-[#e2f1f2] text-sm"><span class="w-5 h-5 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Suivez votre progression en temps réel</li>
+            <li class="flex items-center gap-3 text-[#e2f1f2] text-sm"><span class="w-5 h-5 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Regardez vos leçons vidéo directement</li>
+            <li class="flex items-center gap-3 text-[#e2f1f2] text-sm"><span class="w-5 h-5 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Soumettez vos travaux pour validation</li>
+            <li class="flex items-center gap-3 text-[#e2f1f2] text-sm"><span class="w-5 h-5 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Téléchargez votre certificat officiel</li>
+          </ul>
+          <button onclick="showPage('dashboard')" class="bg-[#f26722] text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-600 transition-colors shadow-lg">
+            Voir le dashboard →
+          </button>
+        </div>
+        <!-- Mini dashboard preview -->
+        <div class="flex-1 w-full max-w-sm mx-auto">
+          <div class="bg-white/10 backdrop-blur rounded-3xl p-1.5 border border-white/10">
+            <div class="bg-[#f6faf7] rounded-2xl overflow-hidden">
+              <div class="bg-[#034956] px-4 py-3 flex items-center gap-3 border-b border-white/10">
+                <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-white/20"></div><div class="w-2.5 h-2.5 rounded-full bg-white/20"></div><div class="w-2.5 h-2.5 rounded-full bg-white/20"></div></div>
+                <span class="text-white/60 text-xs">form-academy · Dashboard</span>
+              </div>
+              <div class="flex h-48">
+                <!-- Mini sidebar -->
+                <div class="w-14 bg-[#034956] flex flex-col items-center py-4 gap-4">
+                  <div class="w-6 h-6 bg-[#f26722] rounded-md"></div>
+                  <div class="w-5 h-1 bg-white/20 rounded"></div>
+                  <div class="w-5 h-1 bg-white/20 rounded"></div>
+                  <div class="w-5 h-1 bg-white/20 rounded"></div>
+                  <div class="w-5 h-1 bg-white/20 rounded"></div>
+                </div>
+                <!-- Mini content -->
+                <div class="flex-1 p-3 space-y-2">
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <div class="bg-white rounded-lg p-2 text-center"><p class="text-[#f26722] font-bold text-sm">2</p><p class="text-[#034956]/40 text-[9px]">En cours</p></div>
+                    <div class="bg-white rounded-lg p-2 text-center"><p class="text-[#034956] font-bold text-sm">1</p><p class="text-[#034956]/40 text-[9px]">Terminé</p></div>
+                    <div class="bg-white rounded-lg p-2 text-center"><p class="text-[#f26722] font-bold text-sm">1</p><p class="text-[#034956]/40 text-[9px]">Certif.</p></div>
+                  </div>
+                  <div class="bg-[#034956] rounded-xl p-2.5 text-white">
+                    <p class="text-xs font-bold leading-snug mb-1.5">Couture Prêt-à-Porter</p>
+                    <div class="flex items-center gap-1.5">
+                      <div class="flex-1 bg-white/20 rounded-full h-1">
+                        <div class="bg-[#f26722] h-1 rounded-full" style="width:75%"></div>
+                      </div>
+                      <span class="text-[9px] text-[#e2f1f2]">75%</span>
+                    </div>
+                  </div>
+                  <div class="bg-white rounded-xl p-2">
+                    <p class="text-[9px] text-[#034956]/40 mb-1">Prochain cours</p>
+                    <p class="text-[10px] text-[#034956] font-semibold">Couture Pour Enfant</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="bg-white py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <p class="text-[#f26722] text-xs uppercase tracking-widest font-semibold mb-3">Comment ça marche</p>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-[#034956] mb-4">L'expérience Form Academy</h2>
+        <p class="text-[#034956]/60 max-w-xl mx-auto text-base leading-relaxed">Une expérience complète, du premier cours jusqu'au certificat.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-14">
+        <div class="flex gap-5 bg-[#f6faf7] rounded-2xl p-6"><div class="bg-[#f26722]/10 text-[#f26722] w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><h3 class="text-[#034956] font-bold text-lg mb-2">Leçons vidéo HD</h3><p class="text-[#034956]/60 text-sm leading-relaxed">Accédez à des cours vidéo professionnels disponibles à tout moment. Revoyez chaque leçon autant de fois que nécessaire.</p></div></div>
+        <div class="flex gap-5 bg-[#f6faf7] rounded-2xl p-6"><div class="bg-[#034956]/10 text-[#034956] w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg></div><div><h3 class="text-[#034956] font-bold text-lg mb-2">Communauté Telegram</h3><p class="text-[#034956]/60 text-sm leading-relaxed">Rejoignez notre groupe exclusif. Échangez avec d'autres étudiantes et partagez vos créations.</p></div></div>
+        <div class="flex gap-5 bg-[#f6faf7] rounded-2xl p-6"><div class="bg-[#f26722]/10 text-[#f26722] w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></div><div><h3 class="text-[#034956] font-bold text-lg mb-2">Évaluation & Suivi</h3><p class="text-[#034956]/60 text-sm leading-relaxed">Soumettez vos travaux et recevez un retour personnalisé. Votre progression est validée à chaque étape.</p></div></div>
+        <div class="flex gap-5 bg-[#f6faf7] rounded-2xl p-6"><div class="bg-[#034956]/10 text-[#034956] w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg></div><div><h3 class="text-[#034956] font-bold text-lg mb-2">Certificat officiel</h3><p class="text-[#034956]/60 text-sm leading-relaxed">Obtenez votre certificat Form Academy à la fin de votre formation. Une reconnaissance concrète.</p></div></div>
+      </div>
+      <!-- Steps -->
+      <div class="bg-[#034956] rounded-3xl p-8 md:p-12">
+        <h3 class="text-white font-bold text-2xl mb-8 text-center">Votre parcours en 6 étapes</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">01</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Inscrivez-vous et choisissez votre formation</p></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">02</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Effectuez votre paiement (CCP ou BaridiMob)</p></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">03</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Recevez votre lien d'accès par message</p></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">04</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Commencez à apprendre à votre rythme</p></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">05</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Soumettez vos travaux pour validation</p></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">06</div><p class="text-[#e2f1f2] text-sm leading-relaxed pt-2">Téléchargez votre certificat officiel</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-[#f6faf7] py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-[#034956] rounded-3xl overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <div class="flex-1 p-10 md:p-14 flex flex-col justify-center">
+            <p class="text-[#f26722] text-xs uppercase tracking-widest font-semibold mb-4">Commencez dès aujourd'hui</p>
+            <h2 class="text-white text-3xl sm:text-4xl font-extrabold leading-tight mb-5">Prête à créer avec<br/><span class="text-[#f26722]">confiance</span> ?</h2>
+            <p class="text-[#e2f1f2]/65 text-base leading-relaxed mb-8 max-w-md">Rejoignez plus de 600 étudiantes qui ont transformé leur passion en compétence.</p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <button onclick="showPage('enrollment')" class="bg-[#f26722] text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-600 transition-colors text-center shadow-lg">S'inscrire maintenant</button>
+              <button onclick="document.getElementById('courses-section').scrollIntoView({behavior:'smooth'})" class="border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold hover:border-white transition-colors text-center">Voir les cours</button>
+            </div>
+          </div>
+          <div class="md:w-72 bg-white/5 border-t md:border-t-0 md:border-l border-white/10 p-10 flex flex-col justify-center gap-5">
+            <h3 class="text-white font-bold">Modes de paiement</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 bg-white/10 rounded-xl px-5 py-4"><div class="w-2 h-2 bg-[#f26722] rounded-full"></div><span class="text-white font-semibold">CCP</span></div>
+              <div class="flex items-center gap-3 bg-white/10 rounded-xl px-5 py-4"><div class="w-2 h-2 bg-[#f26722] rounded-full"></div><span class="text-white font-semibold">BaridiMob</span></div>
+            </div>
+            <p class="text-[#e2f1f2]/50 text-xs leading-relaxed">Notre équipe vous contacte sous 24h après inscription.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-[#034956] text-[#e2f1f2]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <svg viewBox="0 0 100 100" fill="none" class="w-9 h-9"><path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#e2f1f2" stroke-width="9" fill="none"/><path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="8" fill="none" stroke-linecap="round"/><line x1="38" y1="55" x2="62" y2="55" stroke="#f26722" stroke-width="8" stroke-linecap="round"/><line x1="22" y1="57" x2="38" y2="57" stroke="#f26722" stroke-width="6" stroke-linecap="round"/><path d="M15 85 L9 96 L19 90 Z" fill="#e2f1f2"/></svg>
+            <span class="text-white font-bold text-xl">Form Academy</span>
+          </div>
+          <p class="text-[#e2f1f2]/55 text-sm leading-relaxed mb-3 max-w-xs">Formation en ligne en couture et broderie. Apprenez à votre rythme.</p>
+          <p class="text-[#e2f1f2]/35 text-xs">En ligne depuis 2021 · Algérie</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Formations</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-[#e2f1f2]/55 hover:text-white text-sm transition-colors">Couture Prêt-à-Porter</a></li>
+            <li><a href="#" class="text-[#e2f1f2]/55 hover:text-white text-sm transition-colors">Couture Pour Enfant</a></li>
+            <li><a href="#" class="text-[#e2f1f2]/55 hover:text-white text-sm transition-colors">Patronage</a></li>
+            <li><a href="#" class="text-[#e2f1f2]/55 hover:text-white text-sm transition-colors">Broderie</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Contact</h4>
+          <p class="text-[#e2f1f2]/55 text-sm mb-6 leading-relaxed">Paiement via CCP ou BaridiMob.<br/>Notre équipe vous contacte sous 24h.</p>
+          <button onclick="showPage('enrollment')" class="bg-[#f26722] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors">S'inscrire</button>
+        </div>
+      </div>
+      <div class="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[#e2f1f2]/35 text-xs">© 2024 Form Academy. Tous droits réservés.</p>
+        <p class="text-[#e2f1f2]/35 text-xs">Formation en ligne · Algérie</p>
+      </div>
+    </div>
+  </footer>
+</div><!-- end page-home -->
+
+
+<!-- ============================================================
+     PAGE: ENROLLMENT FORM
+     ============================================================ -->
+<div id="page-enrollment" class="page">
+  <div class="min-h-screen bg-[#f6faf7] py-10 px-4">
+    <div class="max-w-xl mx-auto">
+      <!-- Back -->
+      <button onclick="showPage('home')" class="flex items-center gap-2 text-[#034956]/60 hover:text-[#034956] text-sm mb-8 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Retour à l'accueil
+      </button>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 mb-4">
+          <svg viewBox="0 0 100 100" fill="none" class="w-8 h-8"><path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#034956" stroke-width="9" fill="none"/><path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="8" fill="none" stroke-linecap="round"/><line x1="38" y1="55" x2="62" y2="55" stroke="#f26722" stroke-width="8" stroke-linecap="round"/><line x1="22" y1="57" x2="38" y2="57" stroke="#f26722" stroke-width="6" stroke-linecap="round"/></svg>
+          <span class="text-[#034956] font-bold text-lg">Form Academy</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-[#034956] mb-2">Formulaire d'inscription</h1>
+        <p class="text-[#034956]/55 text-sm">Remplissez le formulaire — nous vous contacterons sous 24h</p>
+      </div>
+
+      <!-- Progress indicator -->
+      <div class="flex items-center gap-2 mb-8" id="step-indicator">
+        <div class="step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#f26722] text-white text-sm font-bold flex items-center justify-center" id="dot-1">1</div>
+        <div class="flex-1 h-0.5 bg-[#e2f1f2]" id="line-1-2"></div>
+        <div class="step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#e2f1f2] text-[#034956]/40 text-sm font-bold flex items-center justify-center" id="dot-2">2</div>
+        <div class="flex-1 h-0.5 bg-[#e2f1f2]" id="line-2-3"></div>
+        <div class="step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#e2f1f2] text-[#034956]/40 text-sm font-bold flex items-center justify-center" id="dot-3">3</div>
+      </div>
+      <div class="flex justify-between text-xs text-[#034956]/45 mb-8 px-1">
+        <span>Informations</span>
+        <span>Localisation</span>
+        <span>Récapitulatif</span>
+      </div>
+
+      <!-- Step 1 -->
+      <div id="enroll-step-1" class="enroll-step bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-6 sm:p-8">
+        <h2 class="text-[#034956] font-bold text-lg mb-6">Vos informations personnelles</h2>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[#034956] text-xs font-semibold mb-1.5">Prénom <span class="text-[#f26722]">*</span></label>
+              <input type="text" id="f-first" placeholder="Samira" class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all" />
+            </div>
+            <div>
+              <label class="block text-[#034956] text-xs font-semibold mb-1.5">Nom <span class="text-[#f26722]">*</span></label>
+              <input type="text" id="f-last" placeholder="Benali" class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[#034956] text-xs font-semibold mb-1.5">Numéro de téléphone <span class="text-[#f26722]">*</span></label>
+            <input type="tel" id="f-phone" placeholder="05 XX XX XX XX" class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all" />
+          </div>
+          <div>
+            <label class="block text-[#034956] text-xs font-semibold mb-1.5">Adresse e-mail <span class="text-[#f26722]">*</span></label>
+            <input type="email" id="f-email" placeholder="samira@email.com" class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all" />
+          </div>
+        </div>
+        <button onclick="enrollNext(1)" class="w-full mt-6 bg-[#f26722] text-white py-4 rounded-full font-semibold hover:bg-orange-600 transition-colors">
+          Continuer →
+        </button>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="enroll-step-2" class="enroll-step hidden bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-6 sm:p-8">
+        <h2 class="text-[#034956] font-bold text-lg mb-6">Votre localisation</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[#034956] text-xs font-semibold mb-1.5">Wilaya</label>
+            <input type="text" id="f-city" placeholder="Alger, Oran, Constantine..." class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all" />
+          </div>
+          <div>
+            <label class="block text-[#034956] text-xs font-semibold mb-1.5">Formation souhaitée <span class="text-[#f26722]">*</span></label>
+            <select id="f-course" class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all bg-white">
+              <option value="">Choisissez une formation</option>
+              <option value="cpa">Couture Prêt-à-Porter</option>
+              <option value="cpe">Couture Pour Enfant</option>
+              <option value="pat">Patronage (bientôt)</option>
+              <option value="bro">Broderie (bientôt)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[#034956] text-xs font-semibold mb-2">Mode de paiement <span class="text-[#f26722]">*</span></label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center gap-3 border border-[#e2f1f2] rounded-xl px-4 py-3.5 cursor-pointer has-[:checked]:border-[#f26722] has-[:checked]:bg-[#f26722]/5 transition-all">
+                <input type="radio" name="payment" value="CCP" id="pay-ccp" class="accent-[#f26722]" />
+                <span class="text-sm font-semibold text-[#034956]">CCP</span>
+              </label>
+              <label class="flex items-center gap-3 border border-[#e2f1f2] rounded-xl px-4 py-3.5 cursor-pointer has-[:checked]:border-[#f26722] has-[:checked]:bg-[#f26722]/5 transition-all">
+                <input type="radio" name="payment" value="BaridiMob" id="pay-bm" class="accent-[#f26722]" />
+                <span class="text-sm font-semibold text-[#034956]">BaridiMob</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="enrollBack(2)" class="flex-1 border-2 border-[#034956]/20 text-[#034956] py-4 rounded-full font-semibold hover:border-[#034956] transition-colors">← Retour</button>
+          <button onclick="enrollNext(2)" class="flex-1 bg-[#f26722] text-white py-4 rounded-full font-semibold hover:bg-orange-600 transition-colors">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- Step 3 — Summary -->
+      <div id="enroll-step-3" class="enroll-step hidden bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-6 sm:p-8">
+        <h2 class="text-[#034956] font-bold text-lg mb-6">Récapitulatif de votre inscription</h2>
+        <div class="bg-[#f6faf7] rounded-2xl p-5 mb-6 space-y-3" id="summary-block">
+          <!-- filled by JS -->
+        </div>
+        <div>
+          <label class="block text-[#034956] text-xs font-semibold mb-1.5">Notes ou questions (optionnel)</label>
+          <textarea id="f-notes" rows="3" placeholder="Posez vos questions ou ajoutez des informations supplémentaires..." class="w-full border border-[#e2f1f2] rounded-xl px-4 py-3 text-sm text-[#034956] placeholder-[#034956]/30 focus:outline-none focus:border-[#f26722] focus:ring-2 focus:ring-[#f26722]/10 transition-all resize-none"></textarea>
+        </div>
+        <div class="bg-[#e2f1f2] rounded-xl p-4 mt-4 flex gap-3">
+          <svg class="w-5 h-5 text-[#034956] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-[#034956] text-xs leading-relaxed">Notre équipe vous contactera dans les <strong>24 heures</strong> pour confirmer votre inscription et vous guider pour le paiement.</p>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="enrollBack(3)" class="flex-1 border-2 border-[#034956]/20 text-[#034956] py-4 rounded-full font-semibold hover:border-[#034956] transition-colors">← Retour</button>
+          <button onclick="enrollSubmit()" class="flex-1 bg-[#f26722] text-white py-4 rounded-full font-semibold hover:bg-orange-600 transition-colors">Envoyer l'inscription ✓</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div id="enroll-success" class="hidden text-center py-12">
+        <div class="w-20 h-20 bg-[#034956] rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h2 class="text-2xl font-extrabold text-[#034956] mb-3">Inscription envoyée !</h2>
+        <p class="text-[#034956]/60 text-base leading-relaxed mb-8 max-w-sm mx-auto">Notre équipe vous contactera dans les 24 heures pour confirmer votre paiement et activer votre accès.</p>
+        <div class="bg-[#e2f1f2] rounded-2xl p-5 max-w-xs mx-auto mb-8">
+          <p class="text-[#034956] text-sm font-semibold mb-1">Prochaine étape</p>
+          <p class="text-[#034956]/65 text-sm">Préparez votre preuve de paiement (CCP ou BaridiMob) pour l'envoyer à notre équipe.</p>
+        </div>
+        <button onclick="showPage('home')" class="bg-[#034956] text-white px-8 py-4 rounded-full font-semibold hover:bg-teal-900 transition-colors">Retour à l'accueil</button>
+      </div>
+
+    </div>
+  </div>
+</div><!-- end page-enrollment -->
+
+
+<!-- ============================================================
+     PAGE: STUDENT DASHBOARD
+     ============================================================ -->
+<div id="page-dashboard" class="page">
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <aside id="dash-sidebar" class="dash-sidebar flex flex-col">
+      <!-- Logo — clickable, returns to homepage -->
+      <div class="px-5 py-5 border-b border-white/10">
+        <button onclick="showPage('home')" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity w-full text-left">
+          <svg viewBox="0 0 100 100" fill="none" class="w-8 h-8 flex-shrink-0">
+            <path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#e2f1f2" stroke-width="9" fill="none"/>
+            <path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <line x1="38" y1="55" x2="62" y2="55" stroke="#f26722" stroke-width="8" stroke-linecap="round"/>
+            <line x1="22" y1="57" x2="38" y2="57" stroke="#f26722" stroke-width="6" stroke-linecap="round"/>
+            <path d="M15 85 L9 96 L19 90 Z" fill="#e2f1f2"/>
+          </svg>
+          <span class="text-white font-bold text-base">Form Academy</span>
+        </button>
+      </div>
+      <!-- User -->
+      <div class="px-5 py-4 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-[#f26722] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">S</div>
+          <div>
+            <p class="text-white text-sm font-semibold">Samira B.</p>
+            <p class="text-[#e2f1f2]/40 text-xs">Étudiante</p>
+          </div>
+        </div>
+      </div>
+      <!-- Nav -->
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        <button onclick="dashTab('overview')" id="nav-overview" class="dash-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors bg-white/10 text-white">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span class="text-sm font-medium">Dashboard</span>
+        </button>
+        <button onclick="dashTab('courses')" id="nav-courses" class="dash-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-[#e2f1f2]/60 hover:bg-white/5 hover:text-white">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span class="text-sm font-medium">Mes Cours</span>
+        </button>
+        <button onclick="dashTab('certificates')" id="nav-certificates" class="dash-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-[#e2f1f2]/60 hover:bg-white/5 hover:text-white">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+          <span class="text-sm font-medium">Certificats</span>
+        </button>
+        <button onclick="dashTab('community')" id="nav-community" class="dash-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-[#e2f1f2]/60 hover:bg-white/5 hover:text-white">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+          <span class="text-sm font-medium">Communauté</span>
+        </button>
+      </nav>
+      <!-- Bottom — Return to site -->
+      <div class="px-3 pb-4 border-t border-white/10 pt-4">
+        <button onclick="showPage('home')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 text-[#e2f1f2] hover:bg-white/10 hover:text-white transition-colors text-left">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span class="text-sm font-medium">Retour au site</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dash-main">
+      <!-- Mobile top bar -->
+      <div class="md:hidden bg-[#034956] px-4 py-3 flex items-center justify-between">
+        <button onclick="document.getElementById('dash-sidebar').classList.toggle('open')" class="text-white p-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <span class="text-white font-bold text-sm">Form Academy</span>
+        <button onclick="showPage('home')" class="flex items-center gap-1.5 text-[#e2f1f2]/70 hover:text-white transition-colors text-xs font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Site
+        </button>
+      </div>
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview" class="dash-tab p-5 md:p-8">
+        <!-- Welcome -->
+        <div class="mb-8">
+          <h1 class="text-2xl font-extrabold text-[#034956]">Bienvenue, Samira 👋</h1>
+          <p class="text-[#034956]/55 text-sm mt-1">Continuez votre progression — vous êtes sur la bonne voie !</p>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="grid grid-cols-3 gap-3 md:gap-5 mb-8">
+          <div class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-[#034956]/5 text-center">
+            <div class="w-9 h-9 bg-[#f26722]/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            </div>
+            <p class="text-[#034956] font-extrabold text-2xl">2</p>
+            <p class="text-[#034956]/45 text-xs mt-0.5">En cours</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-[#034956]/5 text-center">
+            <div class="w-9 h-9 bg-[#034956]/8 rounded-xl flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-[#034956]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <p class="text-[#034956] font-extrabold text-2xl">1</p>
+            <p class="text-[#034956]/45 text-xs mt-0.5">Terminé</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-[#034956]/5 text-center">
+            <div class="w-9 h-9 bg-[#f26722]/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            </div>
+            <p class="text-[#034956] font-extrabold text-2xl">1</p>
+            <p class="text-[#034956]/45 text-xs mt-0.5">Certificat</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Continue learning -->
+          <div class="lg:col-span-2 space-y-4">
+            <h2 class="text-[#034956] font-bold text-base">Continuer l'apprentissage</h2>
+
+            <!-- Course card 1 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-5">
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <p class="text-[#034956] font-bold">Couture Prêt-à-Porter</p>
+                  <p class="text-[#034956]/50 text-xs mt-0.5">Leçon 4 sur 12 · Module 2</p>
+                </div>
+                <span class="bg-[#f26722]/10 text-[#f26722] text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">75%</span>
+              </div>
+              <div class="mb-4">
+                <div class="flex justify-between text-xs text-[#034956]/45 mb-1.5">
+                  <span>Progression</span>
+                  <span>9 / 12 leçons</span>
+                </div>
+                <div class="bg-[#f6faf7] rounded-full h-2">
+                  <div class="bg-[#f26722] h-2 rounded-full prog-bar" style="width:75%"></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-[#034956]/50 text-xs">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Dernière activité: hier
+                </div>
+                <button onclick="dashTab('courses')" class="bg-[#f26722] text-white text-xs font-bold px-5 py-2 rounded-full hover:bg-orange-600 transition-colors">Continuer →</button>
+              </div>
+            </div>
+
+            <!-- Course card 2 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-5">
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <p class="text-[#034956] font-bold">Couture Pour Enfant</p>
+                  <p class="text-[#034956]/50 text-xs mt-0.5">Leçon 1 sur 8 · Module 1</p>
+                </div>
+                <span class="bg-[#034956]/8 text-[#034956] text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">13%</span>
+              </div>
+              <div class="mb-4">
+                <div class="flex justify-between text-xs text-[#034956]/45 mb-1.5">
+                  <span>Progression</span>
+                  <span>1 / 8 leçons</span>
+                </div>
+                <div class="bg-[#f6faf7] rounded-full h-2">
+                  <div class="bg-[#034956]/40 h-2 rounded-full prog-bar" style="width:13%"></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-[#034956]/50 text-xs">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Commencé il y a 2 jours
+                </div>
+                <button onclick="dashTab('courses')" class="bg-[#034956] text-white text-xs font-bold px-5 py-2 rounded-full hover:bg-teal-900 transition-colors">Continuer →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right col: Upcoming + Learning path -->
+          <div class="space-y-5">
+            <!-- Upcoming -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-5">
+              <h3 class="text-[#034956] font-bold text-sm mb-4">À venir</h3>
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 bg-[#f26722] rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p class="text-[#034956] text-xs font-semibold">Leçon 5 — Assemblage</p>
+                    <p class="text-[#034956]/40 text-xs">Couture Prêt-à-Porter</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 bg-[#034956]/30 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p class="text-[#034956] text-xs font-semibold">Leçon 6 — Finitions</p>
+                    <p class="text-[#034956]/40 text-xs">Couture Prêt-à-Porter</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 bg-[#034956]/30 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p class="text-[#034956] text-xs font-semibold">Module 2 — Patronage enfant</p>
+                    <p class="text-[#034956]/40 text-xs">Couture Pour Enfant</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Learning path timeline -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-5">
+              <h3 class="text-[#034956] font-bold text-sm mb-4">Votre parcours</h3>
+              <div class="relative pl-5">
+                <div class="absolute left-2 top-2 bottom-2 w-0.5 bg-[#e2f1f2]"></div>
+                <div class="space-y-4">
+                  <div class="relative">
+                    <div class="absolute -left-3 top-0.5 w-2.5 h-2.5 rounded-full bg-[#f26722] border-2 border-white"></div>
+                    <p class="text-xs font-semibold text-[#034956]">Inscrite</p>
+                    <p class="text-xs text-[#034956]/40">Mars 2024</p>
+                  </div>
+                  <div class="relative">
+                    <div class="absolute -left-3 top-0.5 w-2.5 h-2.5 rounded-full bg-[#f26722] border-2 border-white"></div>
+                    <p class="text-xs font-semibold text-[#034956]">Couture Prêt-à-Porter démarrée</p>
+                    <p class="text-xs text-[#034956]/40">Mars 2024</p>
+                  </div>
+                  <div class="relative">
+                    <div class="absolute -left-3 top-0.5 w-2.5 h-2.5 rounded-full bg-[#f26722] border-2 border-white"></div>
+                    <p class="text-xs font-semibold text-[#034956]">Couture Pour Enfant démarrée</p>
+                    <p class="text-xs text-[#034956]/40">Avril 2024</p>
+                  </div>
+                  <div class="relative">
+                    <div class="absolute -left-3 top-0.5 w-2.5 h-2.5 rounded-full bg-[#e2f1f2] border-2 border-white"></div>
+                    <p class="text-xs font-semibold text-[#034956]/40">Certificat — En attente</p>
+                    <p class="text-xs text-[#034956]/30">Bientôt</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end tab-overview -->
+
+      <!-- COURSES TAB -->
+      <div id="tab-courses" class="dash-tab hidden p-5 md:p-8">
+        <h1 class="text-2xl font-extrabold text-[#034956] mb-6">Mes Cours</h1>
+        <div class="space-y-4">
+          <!-- Active course 1 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 overflow-hidden">
+            <div class="bg-[#034956] px-6 py-5 flex items-center justify-between">
+              <div>
+                <p class="text-white font-bold text-lg">Couture Prêt-à-Porter</p>
+                <p class="text-[#e2f1f2]/60 text-sm mt-0.5">8 modules · 12 leçons</p>
+              </div>
+              <span class="bg-[#f26722] text-white text-xs font-bold px-3 py-1.5 rounded-full">En cours</span>
+            </div>
+            <div class="p-6">
+              <div class="mb-4">
+                <div class="flex justify-between text-xs text-[#034956]/50 mb-2">
+                  <span>Progression globale</span>
+                  <span class="font-bold text-[#f26722]">75%</span>
+                </div>
+                <div class="bg-[#f6faf7] rounded-full h-2.5">
+                  <div class="bg-[#f26722] h-2.5 rounded-full" style="width:75%"></div>
+                </div>
+              </div>
+              <!-- Lesson list -->
+              <div class="space-y-2">
+                <p class="text-xs font-semibold text-[#034956]/40 uppercase tracking-wider mb-3">Module 2 — En cours</p>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-[#f6faf7]">
+                  <div class="w-6 h-6 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                  <span class="text-sm text-[#034956]/60 line-through">Leçon 1 — Introduction au patronage</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-[#f6faf7]">
+                  <div class="w-6 h-6 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                  <span class="text-sm text-[#034956]/60 line-through">Leçon 2 — Choix des tissus</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-[#f6faf7]">
+                  <div class="w-6 h-6 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                  <span class="text-sm text-[#034956]/60 line-through">Leçon 3 — Tracé du patron</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl border-2 border-[#f26722]/30 bg-[#f26722]/5">
+                  <div class="w-6 h-6 bg-[#f26722] rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <div class="flex-1">
+                    <span class="text-sm text-[#034956] font-semibold">Leçon 4 — Découpe et assemblage</span>
+                    <span class="ml-2 text-xs text-[#f26722] font-bold">En cours</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-[#f6faf7] opacity-50">
+                  <div class="w-6 h-6 bg-[#e2f1f2] rounded-full flex items-center justify-center flex-shrink-0"><span class="text-[#034956]/40 text-xs font-bold">5</span></div>
+                  <span class="text-sm text-[#034956]/50">Leçon 5 — Assemblage (à venir)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active course 2 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 overflow-hidden">
+            <div class="bg-[#034956]/80 px-6 py-5 flex items-center justify-between">
+              <div>
+                <p class="text-white font-bold text-lg">Couture Pour Enfant</p>
+                <p class="text-[#e2f1f2]/60 text-sm mt-0.5">6 modules · 8 leçons</p>
+              </div>
+              <span class="bg-[#e2f1f2] text-[#034956] text-xs font-bold px-3 py-1.5 rounded-full">Démarré</span>
+            </div>
+            <div class="p-6">
+              <div class="mb-4">
+                <div class="flex justify-between text-xs text-[#034956]/50 mb-2">
+                  <span>Progression globale</span>
+                  <span class="font-bold text-[#034956]">13%</span>
+                </div>
+                <div class="bg-[#f6faf7] rounded-full h-2.5">
+                  <div class="bg-[#034956]/50 h-2.5 rounded-full" style="width:13%"></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl border-2 border-[#034956]/20 bg-[#034956]/3">
+                <div class="w-6 h-6 bg-[#034956] rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                </div>
+                <span class="text-sm text-[#034956] font-semibold">Leçon 1 — Introduction</span>
+                <span class="ml-auto text-xs text-[#034956] font-bold bg-[#e2f1f2] px-2 py-0.5 rounded-full">En cours</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end tab-courses -->
+
+      <!-- CERTIFICATES TAB -->
+      <div id="tab-certificates" class="dash-tab hidden p-5 md:p-8">
+        <h1 class="text-2xl font-extrabold text-[#034956] mb-2">Mes Certificats</h1>
+        <p class="text-[#034956]/55 text-sm mb-8">Les certificats sont délivrés après validation complète de votre formation.</p>
+
+        <!-- Earned certificate -->
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-[#034956]/40 uppercase tracking-wider mb-3">Obtenu</p>
+          <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#034956] to-[#034956]/80 p-6 relative">
+              <div class="absolute top-4 right-4 opacity-10">
+                <svg viewBox="0 0 100 100" fill="none" class="w-24 h-24"><path d="M15 85 L15 45 Q15 15 50 15 Q85 15 85 45 L85 85" stroke="#e2f1f2" stroke-width="9" fill="none"/><path d="M38 75 L38 42 Q38 30 50 30 Q62 30 62 42 L62 75" stroke="#f26722" stroke-width="8" fill="none" stroke-linecap="round"/></svg>
+              </div>
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-[#f26722] rounded-full flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                </div>
+                <div>
+                  <p class="text-white font-bold">Couture Prêt-à-Porter</p>
+                  <p class="text-[#e2f1f2]/60 text-xs">Complété · Janvier 2024</p>
+                </div>
+              </div>
+              <p class="text-[#e2f1f2]/70 text-sm">Certificat de réussite délivré par Form Academy</p>
+            </div>
+            <div class="px-6 py-4 flex items-center justify-between">
+              <div class="flex items-center gap-2 text-[#034956]/50 text-xs">
+                <svg class="w-4 h-4 text-[#f26722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Validé par Form Academy
+              </div>
+              <button class="bg-[#f26722] text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-orange-600 transition-colors flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Télécharger
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending certificate -->
+        <div>
+          <p class="text-xs font-semibold text-[#034956]/40 uppercase tracking-wider mb-3">En attente</p>
+          <div class="space-y-3">
+            <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-5 flex items-center justify-between opacity-70">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-[#e2f1f2] rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-[#034956]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <p class="text-[#034956] font-semibold text-sm">Couture Pour Enfant</p>
+                  <p class="text-[#034956]/40 text-xs">Progression: 13% · En cours</p>
+                </div>
+              </div>
+              <div class="bg-[#e2f1f2] text-[#034956]/60 text-xs font-semibold px-3 py-1.5 rounded-full">En attente</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end tab-certificates -->
+
+      <!-- COMMUNITY TAB -->
+      <div id="tab-community" class="dash-tab hidden p-5 md:p-8">
+        <h1 class="text-2xl font-extrabold text-[#034956] mb-2">Communauté</h1>
+        <p class="text-[#034956]/55 text-sm mb-8">Rejoignez notre groupe Telegram exclusif pour échanger avec d'autres étudiantes.</p>
+        <div class="bg-white rounded-2xl shadow-sm border border-[#034956]/5 p-8 text-center max-w-md mx-auto">
+          <div class="w-16 h-16 bg-[#034956] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+          </div>
+          <h3 class="text-[#034956] font-bold text-lg mb-2">Groupe Telegram Form Academy</h3>
+          <p class="text-[#034956]/55 text-sm leading-relaxed mb-6">Partagez vos créations, posez vos questions et obtenez du soutien de notre communauté de 600+ étudiantes.</p>
+          <a href="#" class="inline-block bg-[#f26722] text-white px-8 py-3.5 rounded-full font-semibold hover:bg-orange-600 transition-colors">
+            Rejoindre le groupe →
+          </a>
+        </div>
+      </div><!-- end tab-community -->
+
+    </main>
+  </div>
+</div><!-- end page-dashboard -->
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+  // ---- PAGE ROUTER ----
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+    // hide navbar on dashboard
+    if (id === 'dashboard') {
+      document.getElementById('main-nav').classList.add('hidden');
+    } else {
+      document.getElementById('main-nav').classList.remove('hidden');
+    }
+  }
+
+  // ---- DASHBOARD TABS ----
+  function dashTab(tab) {
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.add('hidden'));
+    document.getElementById('tab-' + tab).classList.remove('hidden');
+    document.querySelectorAll('.dash-nav-btn').forEach(b => {
+      b.classList.remove('bg-white/10', 'text-white');
+      b.classList.add('text-[#e2f1f2]/60');
+    });
+    const active = document.getElementById('nav-' + tab);
+    if (active) {
+      active.classList.add('bg-white/10', 'text-white');
+      active.classList.remove('text-[#e2f1f2]/60');
+    }
+    // close mobile sidebar
+    document.getElementById('dash-sidebar').classList.remove('open');
+  }
+
+  // ---- ENROLLMENT FORM ----
+  let currentStep = 1;
+
+  function enrollNext(step) {
+    if (step === 1) {
+      const first = document.getElementById('f-first').value.trim();
+      const last = document.getElementById('f-last').value.trim();
+      const phone = document.getElementById('f-phone').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      if (!first || !last || !phone || !email) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return;
+      }
+    }
+    if (step === 2) {
+      const course = document.getElementById('f-course').value;
+      const payment = document.querySelector('input[name="payment"]:checked');
+      if (!course || !payment) {
+        alert('Veuillez choisir une formation et un mode de paiement.');
+        return;
+      }
+      // Build summary
+      const courseLabels = {
+        'cpa': 'Couture Prêt-à-Porter',
+        'cpe': 'Couture Pour Enfant',
+        'pat': 'Patronage',
+        'bro': 'Broderie'
+      };
+      const summaryData = [
+        { label: 'Prénom', value: document.getElementById('f-first').value },
+        { label: 'Nom', value: document.getElementById('f-last').value },
+        { label: 'Téléphone', value: document.getElementById('f-phone').value },
+        { label: 'Email', value: document.getElementById('f-email').value },
+        { label: 'Wilaya', value: document.getElementById('f-city').value || '—' },
+        { label: 'Formation', value: courseLabels[course] || course },
+        { label: 'Paiement', value: payment.value },
+      ];
+      document.getElementById('summary-block').innerHTML = summaryData.map(d => `
+        <div class="flex items-center justify-between py-2 border-b border-[#e2f1f2] last:border-0">
+          <span class="text-[#034956]/50 text-xs">${d.label}</span>
+          <span class="text-[#034956] text-sm font-semibold">${d.value}</span>
+        </div>
+      `).join('');
+    }
+    goToStep(step + 1);
+  }
+
+  function enrollBack(step) {
+    goToStep(step - 1);
+  }
+
+  function goToStep(n) {
+    document.querySelectorAll('.enroll-step').forEach(s => s.classList.add('hidden'));
+    const el = document.getElementById('enroll-step-' + n);
+    if (el) el.classList.remove('hidden');
+    currentStep = n;
+    updateStepUI(n);
+    window.scrollTo(0, 0);
+  }
+
+  function updateStepUI(n) {
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('dot-' + i);
+      if (i < n) {
+        dot.className = 'step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#034956] text-white text-sm font-bold flex items-center justify-center';
+        dot.innerHTML = '✓';
+      } else if (i === n) {
+        dot.className = 'step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#f26722] text-white text-sm font-bold flex items-center justify-center';
+        dot.innerHTML = i;
+      } else {
+        dot.className = 'step-dot flex-shrink-0 w-8 h-8 rounded-full bg-[#e2f1f2] text-[#034956]/40 text-sm font-bold flex items-center justify-center';
+        dot.innerHTML = i;
+      }
+    }
+    if (document.getElementById('line-1-2')) {
+      document.getElementById('line-1-2').style.background = n >= 2 ? '#f26722' : '#e2f1f2';
+      document.getElementById('line-2-3').style.background = n >= 3 ? '#f26722' : '#e2f1f2';
+    }
+  }
+
+  function enrollSubmit() {
+    document.querySelectorAll('.enroll-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById('enroll-success').classList.remove('hidden');
+    goToStep(4); // resets dots to all done
+  }
+</script>
+
+</body>
+</html>
