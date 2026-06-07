@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Form Academy</title>
+  <script>
+    // GitHub Pages SPA routing workaround.
+    // Stores the full URL in sessionStorage, then redirects to the base index.html.
+    // index.html reads it back and restores the route via history.replaceState.
+    //
+    // Works for root deployments (username.github.io)
+    // and subpath deployments (username.github.io/repo-name/).
+    sessionStorage.setItem('spa-redirect', location.href);
+
+    // Detect the deployment base path.
+    // For project sites: first path segment is the repo name (e.g. /form-academy/).
+    // For user sites (username.github.io): no subpath, redirect to /.
+    var segments = location.pathname.split('/').filter(Boolean);
+    var appRoutes = ['login','enrollment','activate','dashboard','admin','course'];
+    var base = '/';
+    if (segments.length > 0 && appRoutes.indexOf(segments[0]) === -1) {
+      base = '/' + segments[0] + '/';
+    }
+    location.replace(location.origin + base);
+  </script>
+</head>
+<body></body>
+</html>
